@@ -3,7 +3,7 @@ token = token value
 ; get this ID by enabling "Developer Mode"
 channel_id = channel id
 command_prefix = ?
-; if staff should be revealed to users in replies; 'true' enables, 'false' or anything else disables
+; if staff should be hidden users in replies; 'true' hides, 'false' or anything else reveales
 anonymous_staff = true
 playing = Send DM to contact staff!
 
