@@ -75,13 +75,13 @@ async def on_message(message):
             return
         embed = discord.Embed(color=gen_color(int(message.author.id)), description=message.content)
         to_send = '{0.id} {0.mention}'.format(message.author)
-        await client.send_message(client.channel, to_send, embed=embed)
         if message.attachments:
             attachment_urls = []
             for attachment in message.attachments:
                 attachment_urls += "<{}>".format(attachment["url"])
-            attachment_msg = ", ".join(attachment.urls)
-            await client.send_message(client.channel, "Attachments in above message: " + attachment_msg)
+            attachment_msg = "\n".join(attachment.urls)
+            embed.add_field(name="Attachments", value=attachment_msg, inline=False)
+        await client.send_message(client.channel, to_send, embed=embed)
         await asyncio.sleep(int(config['AntiSpam']['seconds']))
         anti_spam_check[message.author.id] -= 1
     elif message.channel == client.channel:
