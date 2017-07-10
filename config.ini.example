@@ -1,0 +1,14 @@
+[Main]
+token = token value
+; get this ID by enabling "Developer Mode"
+channel_id = channel id
+command_prefix = ?
+; if staff should be revealed to users in replies; 'true' enables, 'false' or anything else disables
+anonymous_staff = true
+playing = Send DM to contact staff!
+
+[AntiSpam]
+; amount of messages per seconds until the bot auto-ignores the user
+; default means 4 messages under 3 seconds until the user is ignored
+seconds = 3
+messages = 4
