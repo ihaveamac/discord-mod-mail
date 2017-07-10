@@ -79,7 +79,7 @@ async def on_message(message):
         if message.attachments:
             attachment_urls = []
             for attachment in message.attachments:
-                attachment_urls += "<{}>".format(attachment.url)
+                attachment_urls += "<{}>".format(attachment["url"])
             attachment_msg = ", ".join(attachment.urls)
             await client.send_message(client.channel, "Attachments in above message: " + attachment_msg)
         await asyncio.sleep(int(config['AntiSpam']['seconds']))
