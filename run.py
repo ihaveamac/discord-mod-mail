@@ -7,7 +7,7 @@ import json
 import random
 import os
 
-version = '1.0'
+version = '1.1dev'
 
 print('Starting discord-mod-mail {}!'.format(version))
 
@@ -78,9 +78,9 @@ async def on_message(message):
         if message.attachments:
             attachment_urls = []
             for attachment in message.attachments:
-                attachment_urls.append("<{}>".format(attachment["url"]))
-            attachment_msg = "\n".join(attachment_urls)
-            embed.add_field(name="Attachments", value=attachment_msg, inline=False)
+                attachment_urls.append('[{}]({})'.format(attachment['filename'], attachment['url']))
+            attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} s '.join(attachment_urls)
+            embed.add_field(name='Attachments', value=attachment_msg, inline=False)
         await client.send_message(client.channel, to_send, embed=embed)
         await asyncio.sleep(int(config['AntiSpam']['seconds']))
         anti_spam_check[message.author.id] -= 1
@@ -118,6 +118,12 @@ async def on_message(message):
                         else:
                             to_send = '{}: '.format(message.author.mention)
                         to_send += command_contents
+                        # this will not work properly since the source message is deleted, invalidating attachments
+                        # if message.attachments:
+                        #     attachment_urls = []
+                        #     for attachment in message.attachments:
+                        #         attachment_urls.append('[{}]({})'.format(attachment['filename'], attachment['url']))
+                        #     attachment_msg = '\n\n\N{BULLET} ' + '\n\N{BULLET} s '.join(attachment_urls)
                         try:
                             await client.send_message(member, to_send)
                             header_message = '{0.author.mention} replying to {1.id} {1.mention}'.format(message, member)
