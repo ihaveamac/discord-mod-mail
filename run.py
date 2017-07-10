@@ -6,8 +6,9 @@ import discord
 import json
 import random
 import os
+from urllib.request import urlopen
 
-version = '1.1dev'
+version = '1.1'
 
 print('Starting discord-mod-mail {}!'.format(version))
 
@@ -118,12 +119,6 @@ async def on_message(message):
                         else:
                             to_send = '{}: '.format(message.author.mention)
                         to_send += command_contents
-                        # this will not work properly since the source message is deleted, invalidating attachments
-                        # if message.attachments:
-                        #     attachment_urls = []
-                        #     for attachment in message.attachments:
-                        #         attachment_urls.append('[{}]({})'.format(attachment['filename'], attachment['url']))
-                        #     attachment_msg = '\n\n\N{BULLET} ' + '\n\N{BULLET} s '.join(attachment_urls)
                         try:
                             await client.send_message(member, to_send)
                             header_message = '{0.author.mention} replying to {1.id} {1.mention}'.format(message, member)
