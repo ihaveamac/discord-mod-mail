@@ -8,7 +8,7 @@ import random
 import os
 from urllib.request import urlopen
 
-version = '1.1'
+version = '1.2.dev0'
 
 print('Starting discord-mod-mail {}!'.format(version))
 
@@ -57,25 +57,42 @@ anti_spam_check = {}
 
 @client.event
 async def on_message(message):
-    if message.author == client.user:
+    author = message.author
+    if author == client.user:
         return
     if not client.already_ready:
         return
+
     if isinstance(message.channel, discord.PrivateChannel):
-        if message.author.id in ignored_users:
+        if author.id in ignored_users:
             return
-        if message.author.id not in anti_spam_check:
-            anti_spam_check[message.author.id] = 0
-        anti_spam_check[message.author.id] += 1
-        if anti_spam_check[message.author.id] >= int(config['AntiSpam']['messages']):
-            if message.author.id not in ignored_users:  # prevent duplicates
-                ignored_users.append(message.author.id)
+        if author.id not in anti_spam_check:
+            anti_spam_check[author.id] = 0
+
+        anti_spam_check[author.id] += 1
+        if anti_spam_check[author.id] >= int(config['AntiSpam']['messages']):
+            if author.id not in ignored_users:  # prevent duplicates
+                ignored_users.append(author.id)
             with open('ignored.json', 'w') as f:
                 json.dump(ignored_users, f)
-            await client.send_message(client.channel, '{0.id} {0.mention} auto-ignored due to spam. Use `{1}unignore` to reverse.'.format(message.author, config['Main']['command_prefix']))
+            await client.send_message(client.channel, '{0.id} {0.mention} auto-ignored due to spam. Use `{1}unignore` to reverse.'.format(author, config['Main']['command_prefix']))
             return
-        embed = discord.Embed(color=gen_color(int(message.author.id)), description=message.content)
-        to_send = '{0.id} {0.mention}'.format(message.author)
+
+        # for the purpose of nicknames, if anys
+        for server in client.servers:
+            member = server.get_member(author.id)
+            if member:
+                author = member
+            break
+
+        embed = discord.Embed(color=gen_color(int(author.id)), description=message.content)
+        if isinstance(author, discord.Member) and author.nick:
+            author_name = '{0.nick} ({0})'.format(author)
+        else:
+            author_name = str(author)
+        embed.set_author(name=author_name, icon_url=author.avatar_url if author.avatar else author.default_avatar_url)
+
+        to_send = '{0.id} {0.mention}'.format(author)
         if message.attachments:
             attachment_urls = []
             for attachment in message.attachments:
@@ -84,31 +101,35 @@ async def on_message(message):
             embed.add_field(name='Attachments', value=attachment_msg, inline=False)
         await client.send_message(client.channel, to_send, embed=embed)
         await asyncio.sleep(int(config['AntiSpam']['seconds']))
-        anti_spam_check[message.author.id] -= 1
+        anti_spam_check[author.id] -= 1
+
     elif message.channel == client.channel:
         if message.content.startswith(config['Main']['command_prefix']):
             # this might be the wrong way
             command_split = message.content[len(config['Main']['command_prefix']):].strip().split(' ', maxsplit=1)
             command_name = command_split[0]
             command_contents = command_split[1]
+
             if command_name == 'ignore':
                 user_id = command_contents.split(' ', maxsplit=1)[0]
                 if user_id in ignored_users:
-                    await client.send_message(client.channel, '{0.author.mention} {1} is already ignored.'.format(message, user_id))
+                    await client.send_message(client.channel, '{0.mention} {1} is already ignored.'.format(author, user_id))
                 else:
                     ignored_users.append(user_id)
                     with open('ignored.json', 'w') as f:
                         json.dump(ignored_users, f)
-                    await client.send_message(client.channel, '{0.author.mention} {1} is now ignored. Messages from this user will not appear. Use `{2}unignore` to reverse.'.format(message, user_id, config['Main']['command_prefix']))
+                    await client.send_message(client.channel, '{0.mention} {1} is now ignored. Messages from this user will not appear. Use `{2}unignore` to reverse.'.format(author, user_id, config['Main']['command_prefix']))
+
             elif command_name == 'unignore':
                 user_id = command_contents.split(' ', maxsplit=1)[0]
                 if user_id not in ignored_users:
-                    await client.send_message(client.channel, '{0.author.mention} {1} is not ignored.'.format(message, user_id))
+                    await client.send_message(client.channel, '{0.mention} {1} is not ignored.'.format(author, user_id))
                 else:
                     ignored_users.remove(user_id)
                     with open('ignored.json', 'w') as f:
                         json.dump(ignored_users, f)
-                    await client.send_message(client.channel, '{0.author.mention} {1} is no longer ignored. Messages from this user will appear again. Use `{2}ignore` to reverse.'.format(message, user_id, config['Main']['command_prefix']))
+                    await client.send_message(client.channel, '{0.mention} {1} is no longer ignored. Messages from this user will appear again. Use `{2}ignore` to reverse.'.format(author, user_id, config['Main']['command_prefix']))
+
             else:
                 for server in client.servers:
                     member = server.get_member(command_name)
@@ -117,17 +138,17 @@ async def on_message(message):
                         if config['Main']['anonymous_staff']:
                             to_send = 'Staff reply: '
                         else:
-                            to_send = '{}: '.format(message.author.mention)
+                            to_send = '{}: '.format(author.mention)
                         to_send += command_contents
                         try:
                             await client.send_message(member, to_send)
-                            header_message = '{0.author.mention} replying to {1.id} {1.mention}'.format(message, member)
+                            header_message = '{0.mention} replying to {1.id} {1.mention}'.format(author, member)
                             if member.id in ignored_users:
                                 header_message += ' (replies ignored)'
                             await client.send_message(client.channel, header_message, embed=embed)
                             await client.delete_message(message)
                         except discord.errors.Forbidden:
-                            await client.send_message(client.channel, '{0.author.mention} {1.mention} has disabled DMs or is not in a shared server.'.format(message, member))
+                            await client.send_message(client.channel, '{0.mention} {1.mention} has disabled DMs or is not in a shared server.'.format(author, member))
                         break
 
 
