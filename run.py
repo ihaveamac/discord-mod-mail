@@ -6,10 +6,15 @@ import json
 import random
 import os
 from subprocess import check_output, CalledProcessError
+from sys import version_info
 
 import discord
 
 version = '1.2.dev0'
+
+pyver = '{0[0]}.{0[1]}.{0[2]}'.format(version_info)
+if version_info[3] != 'final':
+    pyver += '{0[3][0]}{0[4]}'.format(version_info)
 
 try:
     commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii')[:-1]
@@ -51,8 +56,8 @@ async def on_ready():
     if not client.channel:
         print('Channel with ID {} not found.'.format(config['Main']['channel_id']))
         await client.close()
-    startup_message = '{0.user} is now ready. Version {1}, branch {2}, commit {3}'.format(client, version, branch,
-                                                                                          commit[0:7])
+    startup_message = '{0.user} is now ready. Version {1}, branch {2}, commit {3}, Python {4}'.format(
+        client, version, branch, commit[0:7], pyver)
     await client.send_message(client.channel, startup_message)
     print(startup_message)
     await client.change_presence(game=discord.Game(name=config['Main']['playing']))
