@@ -2,12 +2,26 @@
 
 import asyncio
 import configparser
-import discord
 import json
 import random
 import os
+from subprocess import check_output, CalledProcessError
+
+import discord
 
 version = '1.2.dev0'
+
+try:
+    commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii')[:-1]
+except CalledProcessError as e:
+    print('Checking for git commit failed: {} {}'.format(type(e).__name__, e))
+    commit = '<unknown>'
+
+try:
+    branch = check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode()[:-1]
+except CalledProcessError as e:
+    print('Checking for git branch failed: {} {}'.format(type(e).__name__, e))
+    branch = '<unknown>'
 
 print('Starting discord-mod-mail {}!'.format(version))
 
@@ -37,8 +51,10 @@ async def on_ready():
     if not client.channel:
         print('Channel with ID {} not found.'.format(config['Main']['channel_id']))
         await client.close()
-    await client.send_message(client.channel, '{0.user} is now ready.'.format(client))
-    print('{0.user} is now ready.'.format(client))
+    startup_message = '{0.user} is now ready. Version {1}, branch {2}, commit {3}'.format(client, version, branch,
+                                                                                          commit[0:7])
+    await client.send_message(client.channel, startup_message)
+    print(startup_message)
     await client.change_presence(game=discord.Game(name=config['Main']['playing']))
     client.already_ready = True
 
