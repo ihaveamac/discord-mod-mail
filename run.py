@@ -207,9 +207,9 @@ async def on_message(message):
                                 await client.send_message(
                                     client.channel, '{0.mention} {1.mention} has disabled DMs or is not in a shared '
                                                     'server.'.format(author, member))
-                        break
+                            break
                     else:
-                        await client.send_message(client.channel, 'Failed to find user with ID {command_name}')
+                        await client.send_message(client.channel, 'Failed to find user with ID {}'.format(command_name))
                 await asyncio.sleep(2)
                 anti_duplicate_replies[command_name] = False
 
