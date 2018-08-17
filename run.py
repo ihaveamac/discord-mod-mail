@@ -74,6 +74,8 @@ def gen_color(user_id):
 
 anti_spam_check = {}
 
+anti_duplicate_replies = {}
+
 
 @client.event
 async def on_message(message):
@@ -174,6 +176,14 @@ async def on_message(message):
                 await client.send_message(client.channel, 'Game presence re-set.')
 
             else:
+                if command_name not in anti_duplicate_replies:
+                    anti_duplicate_replies[command_name] = False
+                elif anti_duplicate_replies[command_name]:
+                    await client.send_message(client.channel, '{0.mention} Your message was not sent to prevent '
+                                                              'multiple replies to the same person within 2 '
+                                                              'seconds.'.format(author))
+                    return
+                anti_duplicate_replies[command_name] = True
                 if not command_contents:
                     await client.send_message(client.channel, 'Did you forget to enter a message?')
                 else:
@@ -198,6 +208,10 @@ async def on_message(message):
                                     client.channel, '{0.mention} {1.mention} has disabled DMs or is not in a shared '
                                                     'server.'.format(author, member))
                         break
+                    else:
+                        await client.send_message(client.channel, 'Failed to find user with ID {command_name}')
+                await asyncio.sleep(2)
+                anti_duplicate_replies[command_name] = False
 
 
 client.run(config['Main']['token'])
