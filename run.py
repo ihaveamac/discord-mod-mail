@@ -6,7 +6,6 @@ import discord
 import json
 import random
 import os
-from urllib.request import urlopen
 
 version = '1.2.dev0'
 
@@ -75,7 +74,9 @@ async def on_message(message):
                 ignored_users.append(author.id)
             with open('ignored.json', 'w') as f:
                 json.dump(ignored_users, f)
-            await client.send_message(client.channel, '{0.id} {0.mention} auto-ignored due to spam. Use `{1}unignore` to reverse.'.format(author, config['Main']['command_prefix']))
+            await client.send_message(client.channel, '{0.id} {0.mention} auto-ignored due to spam. '
+                                                      'Use `{1}unignore` to reverse.'.format(
+                author, config['Main']['command_prefix']))
             return
 
         # for the purpose of nicknames, if anys
@@ -113,12 +114,15 @@ async def on_message(message):
             if command_name == 'ignore':
                 user_id = command_contents.split(' ', maxsplit=1)[0]
                 if user_id in ignored_users:
-                    await client.send_message(client.channel, '{0.mention} {1} is already ignored.'.format(author, user_id))
+                    await client.send_message(client.channel, '{0.mention} {1} is already ignored.'.format(
+                        author, user_id))
                 else:
                     ignored_users.append(user_id)
                     with open('ignored.json', 'w') as f:
                         json.dump(ignored_users, f)
-                    await client.send_message(client.channel, '{0.mention} {1} is now ignored. Messages from this user will not appear. Use `{2}unignore` to reverse.'.format(author, user_id, config['Main']['command_prefix']))
+                    await client.send_message(client.channel, '{0.mention} {1} is now ignored. Messages from this user '
+                                                              'will not appear. Use `{2}unignore` to reverse.'.format(
+                        author, user_id, config['Main']['command_prefix']))
 
             elif command_name == 'unignore':
                 user_id = command_contents.split(' ', maxsplit=1)[0]
@@ -128,7 +132,10 @@ async def on_message(message):
                     ignored_users.remove(user_id)
                     with open('ignored.json', 'w') as f:
                         json.dump(ignored_users, f)
-                    await client.send_message(client.channel, '{0.mention} {1} is no longer ignored. Messages from this user will appear again. Use `{2}ignore` to reverse.'.format(author, user_id, config['Main']['command_prefix']))
+                    await client.send_message(client.channel, '{0.mention} {1} is no longer ignored. Messages from '
+                                                              'this user will appear again. '
+                                                              'Use `{2}ignore` to reverse.'.format(
+                        author, user_id, config['Main']['command_prefix']))
 
             else:
                 for server in client.servers:
@@ -148,7 +155,8 @@ async def on_message(message):
                             await client.send_message(client.channel, header_message, embed=embed)
                             await client.delete_message(message)
                         except discord.errors.Forbidden:
-                            await client.send_message(client.channel, '{0.mention} {1.mention} has disabled DMs or is not in a shared server.'.format(author, member))
+                            await client.send_message(client.channel, '{0.mention} {1.mention} has disabled DMs or is '
+                                                                      'not in a shared server.'.format(author, member))
                         break
 
 
