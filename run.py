@@ -74,9 +74,9 @@ async def on_message(message):
                 ignored_users.append(author.id)
             with open('ignored.json', 'w') as f:
                 json.dump(ignored_users, f)
-            await client.send_message(client.channel, '{0.id} {0.mention} auto-ignored due to spam. '
-                                                      'Use `{1}unignore` to reverse.'.format(
-                author, config['Main']['command_prefix']))
+            await client.send_message(
+                client.channel, '{0.id} {0.mention} auto-ignored due to spam. Use `{1}unignore` to reverse.'.format(
+                    author, config['Main']['command_prefix']))
             return
 
         # for the purpose of nicknames, if anys
@@ -93,7 +93,7 @@ async def on_message(message):
             author_name = str(author)
         embed.set_author(name=author_name, icon_url=author.avatar_url if author.avatar else author.default_avatar_url)
 
-        to_send = '{0.id} {0.mention}'.format(author)
+        to_send = '{0.id}'.format(author)
         if message.attachments:
             attachment_urls = []
             for attachment in message.attachments:
@@ -120,9 +120,10 @@ async def on_message(message):
                     ignored_users.append(user_id)
                     with open('ignored.json', 'w') as f:
                         json.dump(ignored_users, f)
-                    await client.send_message(client.channel, '{0.mention} {1} is now ignored. Messages from this user '
-                                                              'will not appear. Use `{2}unignore` to reverse.'.format(
-                        author, user_id, config['Main']['command_prefix']))
+                    await client.send_message(
+                        client.channel, '{0.mention} {1} is now ignored. Messages from this user will not appear. '
+                                        'Use `{2}unignore` to reverse.'.format(author, user_id,
+                                                                               config['Main']['command_prefix']))
 
             elif command_name == 'unignore':
                 user_id = command_contents.split(' ', maxsplit=1)[0]
@@ -132,10 +133,10 @@ async def on_message(message):
                     ignored_users.remove(user_id)
                     with open('ignored.json', 'w') as f:
                         json.dump(ignored_users, f)
-                    await client.send_message(client.channel, '{0.mention} {1} is no longer ignored. Messages from '
-                                                              'this user will appear again. '
-                                                              'Use `{2}ignore` to reverse.'.format(
-                        author, user_id, config['Main']['command_prefix']))
+                    await client.send_message(
+                        client.channel, '{0.mention} {1} is no longer ignored. Messages from this user will appear '
+                                        'again. Use `{2}ignore` to reverse.'.format(author, user_id,
+                                                                                    config['Main']['command_prefix']))
 
             else:
                 for server in client.servers:
