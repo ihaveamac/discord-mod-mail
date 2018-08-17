@@ -37,6 +37,8 @@ config.read('config.ini')
 
 client.already_ready = False
 
+client.last_id = 'uninitialized'
+
 # to be filled from ignored.json later
 ignored_users = []
 
@@ -124,6 +126,7 @@ async def on_message(message):
             attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} s '.join(attachment_urls)
             embed.add_field(name='Attachments', value=attachment_msg, inline=False)
         await client.send_message(client.channel, to_send, embed=embed)
+        client.last_id = author.id
         await asyncio.sleep(int(config['AntiSpam']['seconds']))
         anti_spam_check[author.id] -= 1
 
@@ -174,6 +177,9 @@ async def on_message(message):
             elif command_name == 'fixgame':
                 await client.change_presence(game=discord.Game(name=config['Main']['playing']))
                 await client.send_message(client.channel, 'Game presence re-set.')
+
+            elif command_name == 'm':
+                await client.send_message(client.channel, '{0} <@!{0}>'.format(client.last_id))
 
             else:
                 if command_name not in anti_duplicate_replies:
