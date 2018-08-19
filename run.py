@@ -123,7 +123,7 @@ async def on_message(message):
             attachment_urls = []
             for attachment in message.attachments:
                 attachment_urls.append('[{}]({})'.format(attachment['filename'], attachment['url']))
-            attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} s '.join(attachment_urls)
+            attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} '.join(attachment_urls)
             embed.add_field(name='Attachments', value=attachment_msg, inline=False)
         await client.send_message(client.channel, to_send, embed=embed)
         client.last_id = author.id
