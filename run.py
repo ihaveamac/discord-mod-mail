@@ -174,6 +174,7 @@ async def on_message(message):
                             f'again. Use `{config["Main"]["command_prefix"]}ignore` to reverse.')
 
             elif command_name == 'fixgame':
+                await client.change_presence(game=None)
                 await client.change_presence(game=discord.Game(name=config['Main']['playing']))
                 await client.send_message(client.channel, 'Game presence re-set.')
 
