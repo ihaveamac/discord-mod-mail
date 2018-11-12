@@ -40,7 +40,6 @@ async def on_ready():
         await client.close()
     # await client.send_message(client.channel, '{0.user} is now ready.'.format(client))
     print('{0.user} is now ready.'.format(client))
-    await client.change_presence(activity=discord.Game(name=config['Main']['playing']))
     client.already_ready = True
 
 
@@ -57,6 +56,8 @@ anti_spam_check = {}
 
 @client.event
 async def on_message(message):
+    if ctx.guild.me.activity.name != config['Main']['playing']:
+        await client.change_presence(activity=discord.Game(name=config['Main']['playing']))
     author = message.author
     if author == client.user:
         return
@@ -151,5 +152,4 @@ async def on_message(message):
                             await client.channel.send('{0.mention} {1.mention} has disabled DMs or is not in a shared server.'.format(author, member))
                         break
 
-
-client.run(config['Main']['token'])
+client.run(config['Main']['token'], status=discord.Game(name=config['Main']['playing']))
