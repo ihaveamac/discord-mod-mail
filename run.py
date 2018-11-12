@@ -81,7 +81,7 @@ anti_duplicate_replies = {}
 
 @client.event
 async def on_message(message):
-    if message.guild.me.activity is None or message.guild.me.activity.name != config['Main']['playing']:
+    if client.channel.guild.me.activity is None or client.channel.guild.me.activity.name != config['Main']['playing']:
         await client.change_presence(activity=discord.Game(name=config['Main']['playing']))
     author = message.author
     if author == client.user:
@@ -193,7 +193,7 @@ async def on_message(message):
                     await client.channel.send('Did you forget to enter a message?')
                 else:
                     for server in client.guilds:
-                        member = server.get_member(command_name)
+                        member = server.get_member(int(command_name))
                         if member:
                             embed = discord.Embed(color=gen_color(int(command_name)), description=command_contents)
                             if config['Main']['anonymous_staff']:
