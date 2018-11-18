@@ -209,8 +209,7 @@ async def on_message(message):
                                 await client.channel.send(header_message, embed=embed)
                                 await message.delete()
                             except discord.errors.Forbidden:
-                                await client.send_message(
-                                    client.channel,
+                                await client.channel.send(
                                     f'{author.mention} {member.mention} has disabled DMs or is not in a shared server.')
                             break
                     else:
