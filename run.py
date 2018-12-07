@@ -125,7 +125,7 @@ async def on_message(message):
         if message.attachments:
             attachment_urls = []
             for attachment in message.attachments:
-                attachment_urls.append(f'[{attachment["filename"]}]({attachment["url"]})')
+                attachment_urls.append(f'[{attachment.filename}]({attachment.url})')
             attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} '.join(attachment_urls)
             embed.add_field(name='Attachments', value=attachment_msg, inline=False)
         await client.channel.send(to_send, embed=embed)
