@@ -34,6 +34,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 client = discord.Client(activity=discord.Game(name=config['Main']['playing']))
+client.channel: discord.TextChannel
 
 client.already_ready = False
 
