@@ -146,7 +146,11 @@ async def on_message(message):
                 if not command_contents:
                     await client.channel.send('Did you forget to enter an ID?')
                 else:
-                    user_id = command_contents.split(' ', maxsplit=1)[0]
+                    try:
+                        user_id = int(command_contents.split(' ', maxsplit=1)[0])
+                    except ValueError:
+                        await client.channel.send('Could not convert to int.')
+                        return
                     if user_id in ignored_users:
                         await client.channel.send(f'{author.mention} {user_id} is already ignored.')
                     else:
@@ -161,7 +165,11 @@ async def on_message(message):
                 if not command_contents:
                     await client.channel.send('Did you forget to enter an ID?')
                 else:
-                    user_id = command_contents.split(' ', maxsplit=1)[0]
+                    try:
+                        user_id = int(command_contents.split(' ', maxsplit=1)[0])
+                    except ValueError:
+                        await client.channel.send('Could not convert to int.')
+                        return
                     if user_id not in ignored_users:
                         await client.channel.send(f'{author.mention} {user_id} is not ignored.')
                     else:
