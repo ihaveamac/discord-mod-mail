@@ -33,7 +33,7 @@ print(f'Starting discord-mod-mail {version}!')
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-client = discord.Client(activity=discord.Game(name=config['Main']['playing']))
+client = discord.Client(activity=discord.Game(name=config['Main']['playing']), max_messages=100)
 client.channel: discord.TextChannel
 
 client.already_ready = False
