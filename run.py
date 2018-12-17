@@ -81,6 +81,13 @@ anti_duplicate_replies = {}
 
 
 @client.event
+async def on_typing(channel, user, when):
+    if isinstance(channel, discord.DMChannel):
+        if user.id not in ignored_users:
+            await client.channel.trigger_typing()
+
+
+@client.event
 async def on_message(message):
     if client.channel.guild.me.activity is None or client.channel.guild.me.activity.name != config['Main']['playing']:
         await client.change_presence(activity=discord.Game(name=config['Main']['playing']))
