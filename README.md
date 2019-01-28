@@ -1,6 +1,6 @@
 # discord-mod-mail
 
-Simple mod-mail system for Discord. See `config.ini.example` for configuration, copy to `config.ini` to use. Python 3.6 or later is required (3.6.7 tested).
+Simple mod-mail system for Discord. See `config.ini.example` for configuration, copy to `config.ini` to use. Python 3.6 or later is required (3.6.8 tested).
 
 Command usage to reply is only limited to the channel used for mod-mail, and not to users with specific roles. Don't allow everyone to send messages to the mod-mail channel because there is no role-check.
 
@@ -12,7 +12,8 @@ This automatically selects Read Messages, Send Messages, and Manage Messages. Yo
 ## Command usage
 Assuming default prefix `?` is used.
 * `?<userid> <message>` - send message to user with userid
-* `?ignore <userid>` - ignore messages from userid
+* `?ignore <userid> [reason]` - ignore messages from userid with optional reason
+* `?qignore <userid>` - quiet ignore, don't notify user
 * `?unignore <userid>` - don't ignore messages from userid
 
 ## License

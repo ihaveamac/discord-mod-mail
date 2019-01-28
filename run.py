@@ -2,13 +2,18 @@
 
 import asyncio
 import configparser
-import json
 import random
-import os
+import sqlite3
 from subprocess import check_output, CalledProcessError
 from sys import version_info
+from typing import TYPE_CHECKING
 
 import discord
+
+if TYPE_CHECKING:
+    from typing import Optional, Tuple
+
+DATABASE_FILE = 'modmail_data.sqlite'
 
 version = '1.2.dev0'
 
@@ -40,15 +45,48 @@ client.already_ready = False
 
 client.last_id = 'uninitialized'
 
-# to be filled from ignored.json later
-ignored_users = []
+db = sqlite3.connect(DATABASE_FILE)
+with db:
+    if db.execute('PRAGMA user_version').fetchone()[0] == 0:
+        print('Setting up', DATABASE_FILE)
+        db.execute('PRAGMA application_id = 0x4D6F644D')  # ModM
+        db.execute('PRAGMA user_version = 1')
+        with open('schema.sql', 'r', encoding='utf-8') as f:
+            db.executescript(f.read())
 
-if os.path.isfile('ignored.json'):
-    with open('ignored.json', 'r') as f:
-        ignored_users = json.load(f)
-else:
-    with open('ignored.json', 'w') as f:
-        json.dump(ignored_users, f)
+        try:
+            print('Converting ignored.json')
+            with open('ignored.json', 'r') as f:
+                # only importing json if needed
+                import json
+                ignored = json.load(f)
+                del json
+
+            db.executemany('INSERT INTO ignored VALUES (?, 1, NULL)', ((x,) for x in ignored))
+            print('Done!')
+
+        except FileNotFoundError:
+            pass
+
+
+def is_ignored(user_id: int) -> 'Optional[Tuple[int, Optional[str]]]':
+    with db:
+        return db.execute('SELECT quiet, reason FROM ignored WHERE user_id = ?', (user_id,)).fetchone()
+
+
+def add_ignore(user_id: int, reason: str = None, is_quiet: bool = False) -> bool:
+    try:
+        with db:
+            print(user_id)
+            db.execute('INSERT INTO ignored VALUES (?, ?, ?)', (user_id, is_quiet, reason))
+            return True
+    except sqlite3.IntegrityError:
+        return False
+
+
+def remove_ignore(user_id: int) -> int:
+    with db:
+        return db.execute('DELETE FROM ignored WHERE user_id = ?', (user_id,)).rowcount
 
 
 @client.event
@@ -83,7 +121,7 @@ anti_duplicate_replies = {}
 @client.event
 async def on_typing(channel, user, when):
     if isinstance(channel, discord.DMChannel):
-        if user.id not in ignored_users:
+        if not is_ignored(user.id):
             await client.channel.trigger_typing()
 
 
@@ -98,17 +136,14 @@ async def on_message(message):
         return
 
     if type(message.channel) is discord.DMChannel:
-        if author.id in ignored_users:
+        if is_ignored(author.id):
             return
         if author.id not in anti_spam_check:
             anti_spam_check[author.id] = 0
 
         anti_spam_check[author.id] += 1
         if anti_spam_check[author.id] >= int(config['AntiSpam']['messages']):
-            if author.id not in ignored_users:  # prevent duplicates
-                ignored_users.append(author.id)
-            with open('ignored.json', 'w') as f:
-                json.dump(ignored_users, f)
+            add_ignore(author.id, 'Automatic anti-spam ignore')
             await client.channel.send(
                 f'{author.id} {author.mention} auto-ignored due to spam. '
                 f'Use `{config["Main"]["command_prefix"]}unignore` to reverse.')
@@ -150,24 +185,42 @@ async def on_message(message):
             except IndexError:
                 command_contents = ''
 
-            if command_name == 'ignore':
+            if command_name == 'ignore' or command_name == 'qignore':
                 if not command_contents:
                     await client.channel.send('Did you forget to enter an ID?')
                 else:
                     try:
-                        user_id = int(command_contents.split(' ', maxsplit=1)[0])
+                        command_args = command_contents.split(' ', maxsplit=1)
+                        user_id = int(command_args[0])
+                        try:
+                            reason = command_args[1]
+                        except IndexError:
+                            reason = None
                     except ValueError:
                         await client.channel.send('Could not convert to int.')
                         return
-                    if user_id in ignored_users:
-                        await client.channel.send(f'{author.mention} {user_id} is already ignored.')
-                    else:
-                        ignored_users.append(user_id)
-                        with open('ignored.json', 'w') as f:
-                            json.dump(ignored_users, f)
+                    is_quiet = command_name == 'qignore'
+                    if add_ignore(user_id, reason, is_quiet):
+                        if not is_quiet:
+                            to_send = 'Your messages are being ignored by staff.'
+                            if reason:
+                                to_send += ' Reason: ' + reason
+                            for server in client.guilds:
+                                member = server.get_member(user_id)
+                                if member:
+                                    try:
+                                        await member.send(to_send)
+                                    except discord.errors.Forbidden:
+                                        await client.channel.send(f'{member.mention} has disabled DMs or is not in a '
+                                                                  f'shared server, not sending reason.')
+                                    break
+                            else:
+                                await client.channel.send('Failed to find user with ID, not sending reason.')
                         await client.channel.send(
                             f'{author.mention} {user_id} is now ignored. Messages from this user will not appear. '
                             f'Use `{config["Main"]["command_prefix"]}unignore` to reverse.')
+                    else:
+                        await client.channel.send(f'{author.mention} {user_id} is already ignored.')
 
             elif command_name == 'unignore':
                 if not command_contents:
@@ -178,15 +231,28 @@ async def on_message(message):
                     except ValueError:
                         await client.channel.send('Could not convert to int.')
                         return
-                    if user_id not in ignored_users:
-                        await client.channel.send(f'{author.mention} {user_id} is not ignored.')
-                    else:
-                        ignored_users.remove(user_id)
-                        with open('ignored.json', 'w') as f:
-                            json.dump(ignored_users, f)
+                    ignored = is_ignored(user_id)
+                    if ignored:
+                        is_quiet = ignored[0]
+                        if not is_quiet:
+                            to_send = 'Your messages are no longer being ignored by staff.'
+                            for server in client.guilds:
+                                member = server.get_member(user_id)
+                                if member:
+                                    try:
+                                        await member.send(to_send)
+                                    except discord.errors.Forbidden:
+                                        await client.channel.send(f'{member.mention} has disabled DMs or is not in '
+                                                                  f'a shared server, not sending notification.')
+                                    break
+                            else:
+                                await client.channel.send('Failed to find user with ID, not sending notification.')
+                    if remove_ignore(user_id):
                         await client.channel.send(
                             f'{author.mention} {user_id} is no longer ignored. Messages from this user will appear '
                             f'again. Use `{config["Main"]["command_prefix"]}ignore` to reverse.')
+                    else:
+                        await client.channel.send(f'{author.mention} {user_id} is not ignored.')
 
             elif command_name == 'fixgame':
                 await client.change_presence(activity=None)
@@ -220,7 +286,7 @@ async def on_message(message):
                             try:
                                 await member.send(to_send)
                                 header_message = f'{author.mention} replying to {member.id} {member.mention}'
-                                if member.id in ignored_users:
+                                if is_ignored(member.id):
                                     header_message += ' (replies ignored)'
                                 await client.channel.send(header_message, embed=embed)
                                 await message.delete()
