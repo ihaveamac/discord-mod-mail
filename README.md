@@ -12,6 +12,7 @@ This automatically selects Read Messages, Send Messages, and Manage Messages. Yo
 ## Command usage
 Assuming default prefix `?` is used.
 * `?<userid> <message>` - send message to user with userid
+* `?m` - @mention last user who contacted mod-mail
 * `?ignore <userid> [reason]` - ignore messages from userid with optional reason
 * `?qignore <userid>` - quiet ignore, don't notify user
 * `?unignore <userid>` - don't ignore messages from userid
