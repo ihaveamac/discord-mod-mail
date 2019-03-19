@@ -1,10 +1,10 @@
 [Main]
-token = token value
+token = NTU3NTczMTE2NjA0MzE3Njk2.D3Kw7w.RHnM_TUHF3GwTxE8KXez94ePUFI
 ; get this ID by enabling "Developer Mode"
-channel_id = channel id
+channel_id = 557609422969372672
 command_prefix = ?
 ; if staff should be hidden users in replies; 'true' hides, 'false' or anything else reveales
-anonymous_staff = true
+anonymous_staff = false
 playing = Send DM to contact staff!
 
 [AntiSpam]
