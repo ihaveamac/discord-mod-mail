@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 DATABASE_FILE = 'modmail_data.sqlite'
 
-version = '1.2.dev0'
+version = '1.2'
 
 pyver = '{0[0]}.{0[1]}.{0[2]}'.format(version_info)
 if version_info[3] != 'final':
