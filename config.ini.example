@@ -1,13 +1,23 @@
+; COPY THIS FILE TO config.ini BEFORE MAKING CHANGES
+
 [Main]
+
+; token for the bot
+; DO NOT MAKE THIS PUBLIC!!!
 token = token value
+
 ; get this ID by enabling "Developer Mode"
 channel_id = channel id
+
 command_prefix = ?
+
 ; if staff should be hidden users in replies; 'true' hides, 'false' or anything else reveales
 anonymous_staff = true
+
 playing = Send DM to contact staff!
 
 [AntiSpam]
+
 ; amount of messages per seconds until the bot auto-ignores the user
 ; default means 4 messages under 3 seconds until the user is ignored
 seconds = 3
