@@ -1,6 +1,8 @@
 # discord-mod-mail
 
-Simple mod-mail system for Discord. See `config.ini.example` for configuration, copy to `config.ini` to use. Python 3.6 or later is required (3.6.8 tested).
+Simple mod-mail system for Discord. See `config.ini.example` for configuration, copy to `config.ini` to use.
+
+Python 3.6 or later is required (3.6.8 tested). discord.py 1.0.0 or later is required.
 
 Command usage to reply is only limited to the channel used for mod-mail, and not to users with specific roles. Don't allow everyone to send messages to the mod-mail channel because there is no role-check.
 
