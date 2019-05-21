@@ -26,11 +26,17 @@ try:
 except CalledProcessError as e:
     print(f'Checking for git commit failed: {type(e).__name__} {e}')
     commit = '<unknown>'
+except FileNotFoundError as e:
+    print('git not found, not showing commit')
+    commit = '<unknown>'
 
 try:
     branch = check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode()[:-1]
 except CalledProcessError as e:
     print(f'Checking for git branch failed: {type(e).__name__} {e}')
+    branch = '<unknown>'
+except FileNotFoundError as e:
+    print('git not found, not showing branch')
     branch = '<unknown>'
 
 print(f'Starting discord-mod-mail {version}!')
