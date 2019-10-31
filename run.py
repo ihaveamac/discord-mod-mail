@@ -174,7 +174,8 @@ async def on_message(message):
         if message.attachments:
             attachment_urls = []
             for attachment in message.attachments:
-                attachment_urls.append(f'[{attachment.filename}]({attachment.url})')
+                attachment_urls.append(f'[{attachment.filename}]({attachment.url}) '
+                                       f'({attachment.size} bytes)')
             attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} '.join(attachment_urls)
             embed.add_field(name='Attachments', value=attachment_msg, inline=False)
         await client.channel.send(to_send, embed=embed)
@@ -298,26 +299,26 @@ async def on_message(message):
                                     warning_messages = []
                                     for a in message.attachments:
                                         if a.size > size_limit:
-                                            error_messages.append(f'{discord.utils.escape_markdown(a.filename)} '
-                                                                  f'is too large to send in a direct message..')
-                                        if a.size > size_limit - 0x1000:
-                                            warning_messages.append(f'{discord.utils.escape_markdown(a.filename)} '
+                                            error_messages.append(f'`{discord.utils.escape_markdown(a.filename)}` '
+                                                                  f'is too large to send in a direct message.')
+                                        elif a.size > size_limit - 0x1000:
+                                            warning_messages.append(f'`{discord.utils.escape_markdown(a.filename)}` '
                                                                     f'is very close to the file size limit of the '
                                                                     f'destination. It may fail to send.')
 
                                     if error_messages:
-                                        final = '\n'.join(warning_messages)
-                                        final += f'\nLimit: {size_limit} bytes ({size_limit / (1024 * 1024):.02f}'
+                                        final = '\n'.join(error_messages)
+                                        final += f'\nLimit: {size_limit} bytes ({size_limit / (1024 * 1024):.02f} MiB)'
                                         final += f'\nRecommended Maximum: {size_limit - size_diff} bytes ' \
-                                                 f'({size_limit - size_diff / (1024 * 1024):.02f}'
+                                                 f'({(size_limit - size_diff) / (1024 * 1024):.02f} MiB)'
                                         await client.channel.send(final)
                                         break
 
                                     if warning_messages:
-                                        final = '\n'.join(error_messages)
-                                        final += f'\nLimit: {size_limit} bytes ({size_limit / (1024 * 1024):.02f}'
+                                        final = '\n'.join(warning_messages)
+                                        final += f'\nLimit: {size_limit} bytes ({size_limit / (1024 * 1024):.02f} MiB)'
                                         final += f'\nRecommended Maximum: {size_limit - size_diff} bytes ' \
-                                                 f'({size_limit - size_diff / (1024 * 1024):.02f}'
+                                                 f'({(size_limit - size_diff) / (1024 * 1024):.02f} MiB)'
                                         await client.channel.send(final)
 
                                     count = len(message.attachments)
@@ -347,7 +348,8 @@ async def on_message(message):
                                     if staff_msg.attachments:
                                         attachment_urls = []
                                         for attachment in message.attachments:
-                                            attachment_urls.append(f'[{attachment.filename}]({attachment.url})')
+                                            attachment_urls.append(f'[{attachment.filename}]({attachment.url}) '
+                                                                   f'({attachment.size} bytes)')
                                         attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} '.join(attachment_urls)
                                         embed.add_field(name='Attachments', value=attachment_msg, inline=False)
 
