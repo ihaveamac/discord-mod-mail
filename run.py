@@ -347,7 +347,7 @@ async def on_message(message):
                                     # add attachment links to mod-mail message
                                     if staff_msg.attachments:
                                         attachment_urls = []
-                                        for attachment in message.attachments:
+                                        for attachment in staff_msg.attachments:
                                             attachment_urls.append(f'[{attachment.filename}]({attachment.url}) '
                                                                    f'({attachment.size} bytes)')
                                         attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} '.join(attachment_urls)
