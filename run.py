@@ -269,6 +269,106 @@ async def on_message(message):
 
             elif command_name == 'm':
                 await client.channel.send(f'{client.last_id} <@!{client.last_id}>')
+            
+            elif command_name == 'r':
+                if command_name not in anti_duplicate_replies:
+                    anti_duplicate_replies[command_name] = False
+                elif anti_duplicate_replies[command_name]:
+                    await client.channel.send(
+                                              f'{author.mention} Your message was not sent to prevent multiple replies '
+                                              f'to the same person within 2 seconds.')
+                    return
+                anti_duplicate_replies[command_name] = True
+                if not command_contents:
+                    await client.channel.send('Did you forget to enter a message?')
+                else:
+                    for server in client.guilds:
+                        member = server.get_member(client.last_id)
+                        if member:
+                            attachments = []
+                            try:
+                                progress_msg = None
+                                if message.attachments:
+                                    size_limit = 0x800000
+                                    size_diff = 0x800
+
+                                    # first check the size of all attachments
+                                    # the 0x800 number is arbitrary, just in case
+                                    # in reality, the file size needs to be like 0x200 smaller than the supposed limit
+                                    error_messages = []
+                                    warning_messages = []
+                                    for a in message.attachments:
+                                        if a.size > size_limit:
+                                            error_messages.append(f'`{discord.utils.escape_markdown(a.filename)}` '
+                                                                  f'is too large to send in a direct message.')
+                                        elif a.size > size_limit - 0x1000:
+                                            warning_messages.append(f'`{discord.utils.escape_markdown(a.filename)}` '
+                                                                    f'is very close to the file size limit of the '
+                                                                    f'destination. It may fail to send.')
+
+                                    if error_messages:
+                                        final = '\n'.join(error_messages)
+                                        final += f'\nLimit: {size_limit} bytes ({size_limit / (1024 * 1024):.02f} MiB)'
+                                        final += f'\nRecommended Maximum: {size_limit - size_diff} bytes ' \
+                                                 f'({(size_limit - size_diff) / (1024 * 1024):.02f} MiB)'
+                                        await client.channel.send(final)
+                                        break
+
+                                    if warning_messages:
+                                        final = '\n'.join(warning_messages)
+                                        final += f'\nLimit: {size_limit} bytes ({size_limit / (1024 * 1024):.02f} MiB)'
+                                        final += f'\nRecommended Maximum: {size_limit - size_diff} bytes ' \
+                                                 f'({(size_limit - size_diff) / (1024 * 1024):.02f} MiB)'
+                                        await client.channel.send(final)
+
+                                    count = len(message.attachments)
+                                    progress_msg = await client.channel.send(f'Downloading attachments... 0/{count}')
+                                    for idx, a in enumerate(message.attachments, 1):
+                                        tf = TemporaryFile()
+                                        await a.save(tf, seek_begin=True)
+                                        attachments.append(discord.File(tf, a.filename))
+                                        await progress_msg.edit(content=f'Downloading attachments... {idx}/{count}')
+
+                                embed = discord.Embed(color=gen_color(int(client.last_id)), description=command_contents)
+                                if config['Main']['anonymous_staff']:
+                                    to_send = 'Staff reply: '
+                                else:
+                                    to_send = f'{author.mention}: '
+                                to_send += command_contents
+                                try:
+                                    if progress_msg:
+                                        await progress_msg.edit(content=f'Sending message with {len(attachments)} '
+                                                                        f'attachments...')
+                                    staff_msg = await member.send(to_send, files=attachments)
+                                    header_message = f'{author.mention} replying to {member.id} {member.mention}'
+                                    if is_ignored(member.id):
+                                        header_message += ' (replies ignored)'
+
+                                    # add attachment links to mod-mail message
+                                    if staff_msg.attachments:
+                                        attachment_urls = []
+                                        for attachment in staff_msg.attachments:
+                                            attachment_urls.append(f'[{attachment.filename}]({attachment.url}) '
+                                                                   f'({attachment.size} bytes)')
+                                        attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} '.join(attachment_urls)
+                                        embed.add_field(name='Attachments', value=attachment_msg, inline=False)
+
+                                    await client.channel.send(header_message, embed=embed)
+                                    if progress_msg:
+                                        await progress_msg.delete()
+                                    await message.delete()
+
+                                except discord.errors.Forbidden:
+                                    await client.channel.send(f'{author.mention} {member.mention} has disabled DMs '
+                                                              f'or is not in a shared server.')
+                                break
+                            finally:
+                                for attach in attachments:
+                                    attach.close()
+                    else:
+                        await client.channel.send(f'Failed to find user with ID {client.last_id}')
+                await asyncio.sleep(2)
+                anti_duplicate_replies[command_name] = False
 
             else:
                 if command_name not in anti_duplicate_replies:
