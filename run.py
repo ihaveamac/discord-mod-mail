@@ -45,7 +45,7 @@ print(f'Starting discord-mod-mail {version}!')
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-client = discord.Client(activity=discord.Game(name=config['Main']['playing']), max_messages=100)
+client = discord.Client(activity=discord.CustomActivity(name=config['Main']['playing']), max_messages=100)
 client.channel: discord.TextChannel
 
 client.already_ready = False
@@ -135,7 +135,7 @@ async def on_typing(channel, user, when):
 @client.event
 async def on_message(message):
     if client.channel.guild.me.activity is None or client.channel.guild.me.activity.name != config['Main']['playing']:
-        await client.change_presence(activity=discord.Game(name=config['Main']['playing']))
+        await client.change_presence(activity=discord.CustomActivity(name=config['Main']['playing']))
     author = message.author
     if author == client.user:
         return
@@ -262,10 +262,10 @@ async def on_message(message):
                     else:
                         await client.channel.send(f'{author.mention} {user_id} is not ignored.')
 
-            elif command_name == 'fixgame':
+            elif command_name == 'fixgame' or command_name == 'fixstatus':
                 await client.change_presence(activity=None)
-                await client.change_presence(activity=discord.Game(name=config['Main']['playing']))
-                await client.channel.send('Game presence re-set.')
+                await client.change_presence(activity=discord.CustomActivity(name=config['Main']['playing']))
+                await client.channel.send('Activity re-set.')
 
             elif command_name == 'm':
                 await client.channel.send(f'{client.last_id} <@!{client.last_id}>')
