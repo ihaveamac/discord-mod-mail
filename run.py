@@ -55,7 +55,9 @@ print(f'Starting discord-mod-mail {version}!')
 config = configparser.ConfigParser()
 config.read(join(data_dir, 'config.ini'))
 
-client = discord.Client(activity=discord.Game(name=config['Main']['playing']), max_messages=100)
+intents = discord.Intents(guilds=True, members=True, messages=True, dm_typing=True)
+
+client = discord.Client(activity=discord.Game(name=config['Main']['playing']), max_messages=100, intents=intents)
 client.channel: discord.TextChannel
 
 client.already_ready = False
