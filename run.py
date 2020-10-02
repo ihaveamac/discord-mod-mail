@@ -4,6 +4,8 @@ import asyncio
 import configparser
 import random
 import sqlite3
+from os import environ
+from os.path import join
 from subprocess import check_output, CalledProcessError
 from sys import version_info
 from tempfile import TemporaryFile
@@ -14,36 +16,44 @@ import discord
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple
 
-DATABASE_FILE = 'modmail_data.sqlite'
 
 version = '1.3b1'
+
+is_docker = environ.get('IS_DOCKER', 0)
+data_dir = environ.get('MODMAIL_DATA_DIR', '.')
+
+database_file = join(data_dir, 'modmail_data.sqlite')
 
 pyver = '{0[0]}.{0[1]}.{0[2]}'.format(version_info)
 if version_info[3] != 'final':
     pyver += '{0[3][0]}{0[4]}'.format(version_info)
 
-try:
-    commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii')[:-1]
-except CalledProcessError as e:
-    print(f'Checking for git commit failed: {type(e).__name__} {e}')
-    commit = '<unknown>'
-except FileNotFoundError as e:
-    print('git not found, not showing commit')
-    commit = '<unknown>'
+if is_docker:
+    commit = environ.get('COMMIT_SHA', '<unknown>')
+    branch = environ.get('COMMIT_BRANCH', '<unknown>')
+else:
+    try:
+        commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii')[:-1]
+    except CalledProcessError as e:
+        print(f'Checking for git commit failed: {type(e).__name__} {e}')
+        commit = '<unknown>'
+    except FileNotFoundError as e:
+        print('git not found, not showing commit')
+        commit = '<unknown>'
 
-try:
-    branch = check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode()[:-1]
-except CalledProcessError as e:
-    print(f'Checking for git branch failed: {type(e).__name__} {e}')
-    branch = '<unknown>'
-except FileNotFoundError as e:
-    print('git not found, not showing branch')
-    branch = '<unknown>'
+    try:
+        branch = check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode()[:-1]
+    except CalledProcessError as e:
+        print(f'Checking for git branch failed: {type(e).__name__} {e}')
+        branch = '<unknown>'
+    except FileNotFoundError as e:
+        print('git not found, not showing branch')
+        branch = '<unknown>'
 
 print(f'Starting discord-mod-mail {version}!')
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(join(data_dir, 'config.ini'))
 
 client = discord.Client(activity=discord.Game(name=config['Main']['playing']), max_messages=100)
 client.channel: discord.TextChannel
@@ -52,10 +62,10 @@ client.already_ready = False
 
 client.last_id = 'uninitialized'
 
-db = sqlite3.connect(DATABASE_FILE)
+db = sqlite3.connect(database_file)
 with db:
     if db.execute('PRAGMA user_version').fetchone()[0] == 0:
-        print('Setting up', DATABASE_FILE)
+        print('Setting up', database_file)
         db.execute('PRAGMA application_id = 0x4D6F644D')  # ModM
         db.execute('PRAGMA user_version = 1')
         with open('schema.sql', 'r', encoding='utf-8') as f:
