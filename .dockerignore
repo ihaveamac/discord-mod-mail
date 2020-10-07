@@ -1,0 +1,9 @@
+.git
+.gitignore
+.dockerignore
+Dockerfile
+dockerbuild.sh
+config.ini.example
+config.ini
+modmail_data.sqlite
+data
