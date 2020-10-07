@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from typing import List, Optional, Tuple
 
 
-version = '1.3'
+version = '1.3.1'
 
 is_docker = environ.get('IS_DOCKER', 0)
 data_dir = environ.get('MODMAIL_DATA_DIR', '.')
