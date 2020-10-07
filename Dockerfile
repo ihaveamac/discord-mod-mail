@@ -7,10 +7,10 @@ RUN useradd -m -d $HOME -s /bin/sh -u 3913 modmail
 WORKDIR $HOME
 COPY ./requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-ARG COMMIT="unknown"
-ARG BRANCH="unknown"
-ENV COMMIT_SHA=${COMMIT}
-ENV COMMIT_BRANCH=${BRANCH}
 USER modmail
 COPY --chown=3913:3913 . .
+ARG BRANCH="unknown"
+ENV COMMIT_BRANCH=${BRANCH}
+ARG COMMIT="unknown"
+ENV COMMIT_SHA=${COMMIT}
 CMD ["python3", "run.py"]
