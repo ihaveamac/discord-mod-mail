@@ -14,10 +14,11 @@ Make sure to add the bot to your private mod-mail channel with Read Messages, Se
 ## Command usage
 Assuming default prefix `?` is used.
 * `?<userid> <message>` - send message to user with userid
-* `?m` - @mention last user who contacted mod-mail
+* `?r <message>` - reply to last user who contacted mod-mail
+* `?m` - get @mention for the last user who contacted mod-mail
 * `?ignore <userid> [reason]` - ignore messages from userid with optional reason
 * `?qignore <userid>` - quiet ignore, don't notify user
-* `?unignore <userid>` - don't ignore messages from userid
+* `?unignore <userid>` - stop ignoring messages from userid
 
 ## Docker
 A [Docker image](https://hub.docker.com/repository/docker/ianburgwin/discord-mod-mail) is provided for the latest release. To run, make sure to mount a path or volume to `/home/modmail/data`. `config.ini` must be placed in this directory, and must be writable for `modmail_data.sqlite` to be added. The uid of the container user is 3913.
