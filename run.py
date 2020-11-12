@@ -55,6 +55,8 @@ print(f'Starting discord-mod-mail {version}!')
 config = configparser.ConfigParser()
 config.read(join(data_dir, 'config.ini'))
 
+post_startup_message = config['Main'].getboolean('post_startup_message', fallback=False)
+
 intents = discord.Intents(guilds=True, members=True, messages=True, dm_typing=True)
 
 client = discord.Client(activity=discord.Game(name=config['Main']['playing']), max_messages=100, intents=intents)
@@ -119,7 +121,8 @@ async def on_ready():
     print('{0.user} is now ready.'.format(client))
     startup_message = (f'{client.user} is now ready. Version {version}, branch {branch}, commit {commit[0:7]}, '
                        f'Python {pyver}')
-    await client.channel.send(startup_message)
+    if post_startup_message:
+        await client.channel.send(startup_message)
     print(startup_message)
     client.already_ready = True
 

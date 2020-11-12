@@ -16,6 +16,9 @@ anonymous_staff = true
 
 playing = Send DM to contact staff!
 
+; if you want to send a message to the channel on startup
+post_startup_message = true
+
 [AntiSpam]
 
 ; amount of messages per seconds until the bot auto-ignores the user
