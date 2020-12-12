@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster
+FROM python:3.8-slim
 LABEL org.opencontainers.image.source https://github.com/ihaveamac/discord-mod-mail
 ENV MODMAIL_DATA_DIR=data
 ENV IS_DOCKER=1
