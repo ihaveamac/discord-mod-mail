@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from typing import List, Optional, Tuple
 
 
-version = '1.3.3'
+version = '1.3.4'
 
 is_docker = environ.get('IS_DOCKER', 0)
 data_dir = environ.get('MODMAIL_DATA_DIR', '.')
@@ -55,7 +55,7 @@ print(f'Starting discord-mod-mail {version}!')
 config = configparser.ConfigParser()
 config.read(join(data_dir, 'config.ini'))
 
-post_startup_message = config['Main'].getboolean('post_startup_message', fallback=False)
+post_startup_message = config['Main'].getboolean('post_startup_message', fallback=True)
 
 intents = discord.Intents(guilds=True, members=True, messages=True, dm_typing=True)
 
