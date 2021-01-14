@@ -292,7 +292,7 @@ async def on_message(message):
                                               f'to the same person within 2 seconds.')
                     return
                 anti_duplicate_replies[command_name] = True
-                if not command_contents:
+                if not (command_contents or message.attachments):
                     await client.channel.send('Did you forget to enter a message?')
                 else:
                     for server in client.guilds:
@@ -392,7 +392,7 @@ async def on_message(message):
                                               f'to the same person within 2 seconds.')
                     return
                 anti_duplicate_replies[command_name] = True
-                if not command_contents:
+                if not (command_contents or message.attachments):
                     await client.channel.send('Did you forget to enter a message?')
                 else:
                     for server in client.guilds:
