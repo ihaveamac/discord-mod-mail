@@ -7,3 +7,4 @@ config.ini.example
 config.ini
 modmail_data.sqlite
 data
+v
