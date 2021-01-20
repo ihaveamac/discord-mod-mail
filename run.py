@@ -199,7 +199,7 @@ async def on_message(message):
     elif message.channel == client.channel:
         if message.content.startswith(config['Main']['command_prefix']):
             # this might be the wrong way
-            command_split = message.content[len(config['Main']['command_prefix']):].strip().split(' ', maxsplit=1)
+            command_split = message.content[len(config['Main']['command_prefix']):].strip().split(maxsplit=1)
             command_name = command_split[0]
             try:
                 command_contents = command_split[1]
