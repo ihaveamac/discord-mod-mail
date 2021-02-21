@@ -16,7 +16,10 @@ RUN pip install --no-compile --no-cache-dir -r requirements.txt
 
 USER modmail
 
-COPY --chown=3913:3913 . .
+COPY LICENSE.md LICENSE.md
+COPY README.md README.md
+COPY schema.sql schema.sql
+COPY run.py run.py
 
 ARG BRANCH="unknown"
 ENV COMMIT_BRANCH=${BRANCH}
