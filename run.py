@@ -343,7 +343,7 @@ async def on_message(message):
                                         await progress_msg.edit(content=f'Downloading attachments... {idx}/{count}')
 
                                 embed = discord.Embed(color=gen_color(int(client.last_id)), description=command_contents)
-                                if config['Main']['anonymous_staff']:
+                                if config['Main'].getboolean('anonymous_staff'):
                                     to_send = 'Staff reply: '
                                 else:
                                     to_send = f'{author.mention}: '
@@ -443,7 +443,7 @@ async def on_message(message):
                                         await progress_msg.edit(content=f'Downloading attachments... {idx}/{count}')
 
                                 embed = discord.Embed(color=gen_color(int(command_name)), description=command_contents)
-                                if config['Main']['anonymous_staff']:
+                                if config['Main'].getboolean('anonymous_staff'):
                                     to_send = 'Staff reply: '
                                 else:
                                     to_send = f'{author.mention}: '
