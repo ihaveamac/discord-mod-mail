@@ -192,10 +192,10 @@ async def on_message(message):
             attachment_msg = '\N{BULLET} ' + '\n\N{BULLET} '.join(attachment_urls)
             embed.add_field(name='Attachments', value=attachment_msg, inline=False)
         await client.channel.send(to_send, embed=embed)
+        await message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
         client.last_id = author.id
         await asyncio.sleep(int(config['AntiSpam']['seconds']))
         anti_spam_check[author.id] -= 1
-        await message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     elif message.channel == client.channel:
         if message.content.startswith(config['Main']['command_prefix']):
