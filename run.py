@@ -195,7 +195,7 @@ async def on_message(message):
         client.last_id = author.id
         await asyncio.sleep(int(config['AntiSpam']['seconds']))
         anti_spam_check[author.id] -= 1
-        message.add_reaction('\N{WHITE CHECK MARK}')
+        message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     elif message.channel == client.channel:
         if message.content.startswith(config['Main']['command_prefix']):
