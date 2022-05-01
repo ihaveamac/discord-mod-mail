@@ -1,5 +1,15 @@
 FROM python:3.9-slim
+
+ARG BRANCH="unknown"
+ARG COMMIT="unknown"
+
+LABEL org.opencontainers.image.title discord-mod-mail
+LABEL org.opencontainers.image.description Simple mod-mail system for Discord
 LABEL org.opencontainers.image.source https://github.com/ihaveamac/discord-mod-mail
+LABEL org.opencontainers.image.url https://github.com/ihaveamac/discord-mod-mail
+LABEL org.opencontainers.image.documentation https://github.com/ihaveamac/discord-mod-mail
+LABEL org.opencontainers.image.licenses MIT
+LABEL org.opencontainers.image.revision $COMMIT
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -21,9 +31,7 @@ COPY README.md README.md
 COPY schema.sql schema.sql
 COPY run.py run.py
 
-ARG BRANCH="unknown"
 ENV COMMIT_BRANCH=${BRANCH}
-ARG COMMIT="unknown"
 ENV COMMIT_SHA=${COMMIT}
 
 CMD ["python3", "run.py"]
