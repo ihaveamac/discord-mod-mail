@@ -11,7 +11,7 @@ from sys import version_info
 from tempfile import TemporaryFile
 from typing import TYPE_CHECKING
 
-import discord
+import disnake
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple
@@ -57,10 +57,10 @@ config.read(join(data_dir, 'config.ini'))
 
 post_startup_message = config['Main'].getboolean('post_startup_message', fallback=True)
 
-intents = discord.Intents(guilds=True, members=True, messages=True, dm_typing=True)
+intents = disnake.Intents(guilds=True, members=True, messages=True, dm_typing=True)
 
-client = discord.Client(activity=discord.Game(name=config['Main']['playing']), max_messages=100, intents=intents)
-client.channel: discord.TextChannel
+client = disnake.Client(activity=disnake.Game(name=config['Main']['playing']), max_messages=100, intents=intents)
+client.channel: disnake.TextChannel
 
 client.already_ready = False
 
@@ -132,7 +132,7 @@ def gen_color(user_id):
     c_r = random.randint(0, 255)
     c_g = random.randint(0, 255)
     c_b = random.randint(0, 255)
-    return discord.Color((c_r << 16) + (c_g << 8) + c_b)
+    return disnake.Color((c_r << 16) + (c_g << 8) + c_b)
 
 
 anti_spam_check = {}
@@ -142,7 +142,7 @@ anti_duplicate_replies = {}
 
 @client.event
 async def on_typing(channel, user, when):
-    if isinstance(channel, discord.DMChannel):
+    if isinstance(channel, disnake.DMChannel):
         if not is_ignored(user.id):
             await client.channel.trigger_typing()
 
@@ -155,7 +155,7 @@ async def on_message(message):
     if not client.already_ready:
         return
 
-    if type(message.channel) is discord.DMChannel:
+    if type(message.channel) is disnake.DMChannel:
         if is_ignored(author.id):
             return
         if author.id not in anti_spam_check:
@@ -176,8 +176,8 @@ async def on_message(message):
                 author = member
             break
 
-        embed = discord.Embed(color=gen_color(int(author.id)), description=message.content)
-        if isinstance(author, discord.Member) and author.nick:
+        embed = disnake.Embed(color=gen_color(int(author.id)), description=message.content)
+        if isinstance(author, disnake.Member) and author.nick:
             author_name = f'{author.nick} ({author})'
         else:
             author_name = str(author)
@@ -232,7 +232,7 @@ async def on_message(message):
                                 if member:
                                     try:
                                         await member.send(to_send)
-                                    except discord.errors.Forbidden:
+                                    except disnake.errors.Forbidden:
                                         await client.channel.send(f'{member.mention} has disabled DMs or is not in a '
                                                                   f'shared server, not sending reason.')
                                     break
@@ -263,7 +263,7 @@ async def on_message(message):
                                 if member:
                                     try:
                                         await member.send(to_send)
-                                    except discord.errors.Forbidden:
+                                    except disnake.errors.Forbidden:
                                         await client.channel.send(f'{member.mention} has disabled DMs or is not in '
                                                                   f'a shared server, not sending notification.')
                                     break
@@ -278,7 +278,7 @@ async def on_message(message):
 
             elif command_name == 'fixgame':
                 await client.change_presence(activity=None)
-                await client.change_presence(activity=discord.Game(name=config['Main']['playing']))
+                await client.change_presence(activity=disnake.Game(name=config['Main']['playing']))
                 await client.channel.send('Game presence re-set.')
 
             elif command_name == 'm':
@@ -313,10 +313,10 @@ async def on_message(message):
                                     warning_messages = []
                                     for a in message.attachments:
                                         if a.size > size_limit:
-                                            error_messages.append(f'`{discord.utils.escape_markdown(a.filename)}` '
+                                            error_messages.append(f'`{disnake.utils.escape_markdown(a.filename)}` '
                                                                   f'is too large to send in a direct message.')
                                         elif a.size > size_limit - 0x1000:
-                                            warning_messages.append(f'`{discord.utils.escape_markdown(a.filename)}` '
+                                            warning_messages.append(f'`{disnake.utils.escape_markdown(a.filename)}` '
                                                                     f'is very close to the file size limit of the '
                                                                     f'destination. It may fail to send.')
 
@@ -340,10 +340,10 @@ async def on_message(message):
                                     for idx, a in enumerate(message.attachments, 1):
                                         tf = TemporaryFile()
                                         await a.save(tf, seek_begin=True)
-                                        attachments.append(discord.File(tf, a.filename))
+                                        attachments.append(disnake.File(tf, a.filename))
                                         await progress_msg.edit(content=f'Downloading attachments... {idx}/{count}')
 
-                                embed = discord.Embed(color=gen_color(int(client.last_id)), description=command_contents)
+                                embed = disnake.Embed(color=gen_color(int(client.last_id)), description=command_contents)
                                 if config['Main'].getboolean('anonymous_staff'):
                                     to_send = 'Staff reply: '
                                 else:
@@ -372,7 +372,7 @@ async def on_message(message):
                                         await progress_msg.delete()
                                     await message.delete()
 
-                                except discord.errors.Forbidden:
+                                except disnake.errors.Forbidden:
                                     await client.channel.send(f'{author.mention} {member.mention} has disabled DMs '
                                                               f'or is not in a shared server.')
                                 break
@@ -413,10 +413,10 @@ async def on_message(message):
                                     warning_messages = []
                                     for a in message.attachments:
                                         if a.size > size_limit:
-                                            error_messages.append(f'`{discord.utils.escape_markdown(a.filename)}` '
+                                            error_messages.append(f'`{disnake.utils.escape_markdown(a.filename)}` '
                                                                   f'is too large to send in a direct message.')
                                         elif a.size > size_limit - 0x1000:
-                                            warning_messages.append(f'`{discord.utils.escape_markdown(a.filename)}` '
+                                            warning_messages.append(f'`{disnake.utils.escape_markdown(a.filename)}` '
                                                                     f'is very close to the file size limit of the '
                                                                     f'destination. It may fail to send.')
 
@@ -440,10 +440,10 @@ async def on_message(message):
                                     for idx, a in enumerate(message.attachments, 1):
                                         tf = TemporaryFile()
                                         await a.save(tf, seek_begin=True)
-                                        attachments.append(discord.File(tf, a.filename))
+                                        attachments.append(disnake.File(tf, a.filename))
                                         await progress_msg.edit(content=f'Downloading attachments... {idx}/{count}')
 
-                                embed = discord.Embed(color=gen_color(int(command_name)), description=command_contents)
+                                embed = disnake.Embed(color=gen_color(int(command_name)), description=command_contents)
                                 if config['Main'].getboolean('anonymous_staff'):
                                     to_send = 'Staff reply: '
                                 else:
@@ -472,7 +472,7 @@ async def on_message(message):
                                         await progress_msg.delete()
                                     await message.delete()
 
-                                except discord.errors.Forbidden:
+                                except disnake.errors.Forbidden:
                                     await client.channel.send(f'{author.mention} {member.mention} has disabled DMs '
                                                               f'or is not in a shared server.')
                                 break
