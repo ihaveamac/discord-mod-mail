@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from typing import List, Optional, Tuple
 
 
-version = '1.3.12'
+version = '1.3.13'
 
 is_docker = environ.get('IS_DOCKER', 0)
 data_dir = environ.get('MODMAIL_DATA_DIR', '.')
@@ -57,7 +57,7 @@ config.read(join(data_dir, 'config.ini'))
 
 post_startup_message = config['Main'].getboolean('post_startup_message', fallback=True)
 
-intents = disnake.Intents(guilds=True, members=True, messages=True, dm_typing=True)
+intents = disnake.Intents(guilds=True, members=True, messages=True, message_content=True, dm_typing=True)
 
 client = disnake.Client(activity=disnake.Game(name=config['Main']['playing']), max_messages=100, intents=intents)
 client.channel: disnake.TextChannel
