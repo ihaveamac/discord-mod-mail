@@ -1,3 +1,11 @@
+# Deprecated
+
+This project has not been meaningfully updated in a long time. I also have not done any Discord bot development in a long time.
+
+I have no plans to update this bot to use slash commands or anything else, so it will require the Message Content privileged intent. Discord now requires manual review to use privileged intents for bots that have access to 10,000 users.
+
+I highly recommend you find another mod mail bot. The code here is really bad and a fork to update it might as well be the same as a rewrite.
+
 # discord-mod-mail
 
 Simple mod-mail system for Discord. See `config.ini.example` for configuration, copy to `config.ini` to use.
